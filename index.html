@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sofinessa Want</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+
+<body>
+    <div id="app" class="tab-today">
+        <!-- Header -->
+        <header class="main-header">
+            <h1 class="brand-title">Sofinessa Want</h1>
+
+            <!-- Emoji Marquee -->
+            <div class="marquee-container">
+                <div class="marquee-content">
+                    <span>🥥 🦙 ❤️ 🍫 🍰</span>
+                    <span>🥥 🦙 ❤️ 🍫 🍰</span>
+                    <span>🥥 🦙 ❤️ 🍫 🍰</span>
+                    <span>🥥 🦙 ❤️ 🍫 🍰</span>
+                    <span>🥥 🦙 ❤️ 🍫 🍰</span>
+                    <span>🥥 🦙 ❤️ 🍫 🍰</span>
+                </div>
+            </div>
+
+            <nav class="tab-nav">
+                <button class="tab-btn active" data-tab="today">Сегодня</button>
+                <button class="tab-btn" data-tab="wishlist">Вишлист</button>
+                <button class="tab-btn" data-tab="feedback">Отзыв</button>
+            </nav>
+        </header>
+
+        <main class="content">
+            <!-- Section 1: Today's Desires -->
+            <section id="today" class="tab-content active">
+                <div class="section-card">
+                    <h2 class="section-title">Сегодня я хочу...</h2>
+
+                    <div class="expandable-group">
+                        <div class="group-header" onclick="toggleExpand('eat')">
+                            <span>🍽 Сегодня я хочу кушать</span>
+                            <span class="icon">▾</span>
+                        </div>
+                        <div id="eat" class="group-content">
+                            <ul id="eat-list" class="desire-list"></ul>
+                            <div class="add-item">
+                                <input type="text" placeholder="Что покушаем?" id="input-eat">
+                                <button onclick="addItem('eat')">+</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="expandable-group">
+                        <div class="group-header" onclick="toggleExpand('sweet')">
+                            <span>🍫 Сегодня я хочу сладкое</span>
+                            <span class="icon">▾</span>
+                        </div>
+                        <div id="sweet" class="group-content">
+                            <ul id="sweet-list" class="desire-list"></ul>
+                            <div class="add-item">
+                                <input type="text" placeholder="Что-то сладенькое?" id="input-sweet">
+                                <button onclick="addItem('sweet')">+</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="expandable-group">
+                        <div class="group-header" onclick="toggleExpand('time')">
+                            <span>✨ Я хочу провести время</span>
+                            <span class="icon">▾</span>
+                        </div>
+                        <div id="time" class="group-content">
+                            <ul id="time-list" class="desire-list"></ul>
+                            <div class="add-item">
+                                <input type="text" placeholder="Как проведем время?" id="input-time">
+                                <button onclick="addItem('time')">+</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="expandable-group">
+                        <div class="group-header" onclick="toggleExpand('special')">
+                            <span>💖 Сегодня я хочу особенного</span>
+                            <span class="icon">▾</span>
+                        </div>
+                        <div id="special" class="group-content">
+                            <ul id="special-list" class="desire-list"></ul>
+                            <div class="add-item">
+                                <input type="text" placeholder="Что-то особенное..." id="input-special">
+                                <button onclick="addItem('special')">+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="footer-action">
+                    <button id="send-to-cat" class="cat-btn">Отправить Коту 🐾</button>
+                </div>
+            </section>
+
+            <!-- Section 2: Wishlist -->
+            <section id="wishlist" class="tab-content">
+                <div class="section-card">
+                    <h2 class="section-title">🎁 Подарки</h2>
+                    <ul id="wish-gifts-list" class="desire-list"></ul>
+                    <div class="add-item">
+                        <input type="text" placeholder="Что ты хочешь?" id="input-wish-gifts">
+                        <button onclick="addItem('wish-gifts')">+</button>
+                    </div>
+                </div>
+                <div class="section-card">
+                    <h2 class="section-title">✨ Досуг</h2>
+                    <ul id="wish-leisure-list" class="desire-list"></ul>
+                    <div class="add-item">
+                        <input type="text" placeholder="Мечты..." id="input-wish-leisure">
+                        <button onclick="addItem('wish-leisure')">+</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 3: Feedback -->
+            <section id="feedback" class="tab-content">
+                <div class="section-card feedback-form">
+                    <h2 class="section-title">Твой отзыв</h2>
+
+                    <div class="fb-field">
+                        <label>Сегодня он:</label>
+                        <input type="text" id="fb-he" placeholder="Кот был...">
+                    </div>
+
+                    <div class="fb-field">
+                        <label>Сегодня я довольна:</label>
+                        <input type="text" id="fb-happy" placeholder="Потому что...">
+                    </div>
+
+                    <div class="fb-field">
+                        <label>Сегодня я недовольна:</label>
+                        <input type="text" id="fb-unhappy" placeholder="Если вдруг что-то не так...">
+                    </div>
+
+                    <div class="fb-field">
+                        <label>Сегодня меня любят на:</label>
+                        <div class="range-wrapper">
+                            <input type="range" id="fb-love" min="0" max="100" value="100">
+                            <span id="love-value">100%</span>
+                        </div>
+                    </div>
+
+                    <div class="fb-field">
+                        <label>А еще:</label>
+                        <textarea id="fb-more" placeholder="Напиши всё, что на душе..."></textarea>
+                    </div>
+
+                    <div class="footer-action">
+                        <button id="send-feedback" class="cat-btn">Отправить Коту 🐾</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Decorative Elements -->
+        <img src="assets/alpaca.png" class="decor-alpaca" alt="Cute Alpaca">
+    </div>
+
+    <!-- Modal for links -->
+    <div id="link-modal" class="modal">
+        <div class="modal-content section-card">
+            <h3>Добавить ссылку</h3>
+            <input type="text" id="modal-link-input" placeholder="https://...">
+            <div class="modal-actions">
+                <button onclick="closeModal()" class="tab-btn">Отмена</button>
+                <button onclick="saveLink()" class="tab-btn active">Сохранить</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
