@@ -37,7 +37,9 @@ const PRIZES = [
     { name: 'Брауни', icon: '🍪' },
     { name: 'Буэно', icon: '🍫' },
     { name: 'Куртюш', icon: '🥨' },
-    { name: 'Горячий шоколад', icon: '☕' }
+    { name: 'Горячий шоколад', icon: '☕' },
+    { name: 'Бельгийская вафля', icon: '🧇' },
+    { name: 'Лимонный тарт', icon: '🍋' }
 ];
 const SLOT_SYMBOLS = PRIZES.map(p => p.icon); // Using icons for slots to keep it visual
 let currentPrize = null;
