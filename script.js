@@ -28,6 +28,20 @@ const defaults = {
 let currentModalTarget = null;
 let currentModalIndex = null;
 
+// Hidden Game State
+let alpacaClickCount = 0;
+let alpacaClickTimer = null;
+const PRIZES = [
+    { name: 'Синабон', icon: '🥐' },
+    { name: 'Тортик', icon: '🍰' },
+    { name: 'Брауни', icon: '🍪' },
+    { name: 'Буэно', icon: '🍫' },
+    { name: 'Куртюш', icon: '🥨' },
+    { name: 'Горячий шоколад', icon: '☕' }
+];
+const SLOT_SYMBOLS = PRIZES.map(p => p.icon); // Using icons for slots to keep it visual
+let currentPrize = null;
+
 // Initialization
 document.addEventListener('DOMContentLoaded', () => {
     loadState();
@@ -35,7 +49,53 @@ document.addEventListener('DOMContentLoaded', () => {
     renderAll();
     updateLoveValue();
     updateAlpacaClass('today');
+    setupAlpacaSecret();
 });
+
+function setupAlpacaSecret() {
+    const alpaca = document.querySelector('.decor-alpaca');
+    if (!alpaca) return;
+
+    // Make it clickable but remove pointer-events: none from CSS if needed, 
+    // or just use capturing since it's above other elements. 
+    // Wait, CSS says pointer-events: none. I must change that.
+    alpaca.style.pointerEvents = 'auto';
+    alpaca.style.cursor = 'pointer';
+
+    alpaca.addEventListener('click', (e) => {
+        e.stopPropagation();
+
+        // Check if chocolate is already dropped
+        if (document.getElementById('chocolate-drop').style.display === 'block') return;
+
+        alpacaClickCount++;
+
+        clearTimeout(alpacaClickTimer);
+        alpacaClickTimer = setTimeout(() => {
+            alpacaClickCount = 0;
+        }, 2000); // Reset if no click for 2s
+
+        triggerAlpacaJump();
+        tg.HapticFeedback.impactOccurred('light');
+
+        if (alpacaClickCount === 5) {
+            dropChocolate(e.clientX, e.clientY);
+            alpacaClickCount = 0;
+        }
+    });
+}
+
+function dropChocolate(x, y) {
+    const drop = document.getElementById('chocolate-drop');
+    drop.style.left = x + 'px';
+    drop.style.top = y + 'px';
+    drop.style.display = 'block';
+    drop.classList.add('chocolate-fall');
+
+    tg.HapticFeedback.notificationOccurred('success');
+
+    // Auto-hide if not clicked after some time? Nah, let it stay.
+}
 
 function loadState() {
     const saved = localStorage.getItem('sofinessa_state_v3');
@@ -303,4 +363,179 @@ function saveLink() {
     renderList(currentModalTarget);
     closeModal();
     tg.HapticFeedback.notificationOccurred('success');
+}
+
+// Slot Machine Logic
+// Slot Machine Logic
+function openGameModal() {
+    document.getElementById('chocolate-drop').style.display = 'none';
+    document.getElementById('chocolate-drop').classList.remove('chocolate-fall');
+
+    // Clear win celebration
+    document.querySelector('.slots').classList.remove('win-celebration');
+
+    // Reset symbols to initial state
+    const initialSymbols = ['🍒', '🍫', '🍰'];
+    [1, 2, 3].forEach(i => {
+        const inner = document.querySelector(`#slot${i} .slot-inner`);
+        inner.innerHTML = `<div style="height: 100px; width: 100%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">${initialSymbols[i - 1]}</div>`;
+        inner.style.transform = 'none';
+        inner.style.transition = 'none';
+        inner.classList.remove('spinning');
+    });
+
+    // Reset game state UI
+    document.getElementById('spin-btn').style.display = 'block';
+    document.getElementById('spin-btn').disabled = false;
+    document.getElementById('spin-btn').innerText = 'Крутить!';
+    document.getElementById('claim-btn').style.display = 'none';
+    document.getElementById('game-modal').classList.add('active');
+
+    tg.HapticFeedback.impactOccurred('medium');
+}
+
+function spinSlots() {
+    const spinBtn = document.getElementById('spin-btn');
+    spinBtn.disabled = true;
+    spinBtn.innerText = 'Крутим... ✨';
+
+    tg.HapticFeedback.impactOccurred('heavy');
+
+    const slots = [
+        document.getElementById('slot1'),
+        document.getElementById('slot2'),
+        document.getElementById('slot3')
+    ];
+
+    // Determine outcome (60% win rate)
+    const isWin = Math.random() < 0.6;
+    let results = [];
+
+    if (isWin) {
+        const prizeIndex = Math.floor(Math.random() * PRIZES.length);
+        const symbol = PRIZES[prizeIndex].icon;
+        currentPrize = PRIZES[prizeIndex];
+        results = [symbol, symbol, symbol];
+    } else {
+        const indices = [
+            Math.floor(Math.random() * SLOT_SYMBOLS.length),
+            Math.floor(Math.random() * SLOT_SYMBOLS.length),
+            Math.floor(Math.random() * SLOT_SYMBOLS.length)
+        ];
+        if (indices[0] === indices[1] && indices[1] === indices[2]) {
+            indices[2] = (indices[2] + 1) % SLOT_SYMBOLS.length;
+        }
+        results = indices.map(idx => SLOT_SYMBOLS[idx]);
+    }
+
+    slots.forEach((s, i) => {
+        const inner = s.querySelector('.slot-inner');
+        const symbolHeight = 100;
+        const itemCount = 40;
+
+        // Winning symbol at the TOP
+        let reelContent = `<div style="height: ${symbolHeight}px; width: 100%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">${results[i]}</div>`;
+
+        // Random items BELOW
+        for (let j = 0; j < itemCount; j++) {
+            const randomSymbol = SLOT_SYMBOLS[Math.floor(Math.random() * SLOT_SYMBOLS.length)];
+            reelContent += `<div style="height: ${symbolHeight}px; width: 100%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">${randomSymbol}</div>`;
+        }
+
+        inner.innerHTML = reelContent;
+        inner.style.transition = 'none';
+        inner.style.transform = `translateY(-${itemCount * symbolHeight}px)`;
+        s.classList.add('spinning');
+    });
+
+    // Stop sequence
+    setTimeout(() => {
+        slots.forEach((s, i) => {
+            setTimeout(() => {
+                const inner = s.querySelector('.slot-inner');
+                s.classList.remove('spinning');
+
+                // Glide DOWN to symbols at the top (0 position)
+                inner.style.transition = 'transform 2s cubic-bezier(0.1, 0.9, 0.3, 1)';
+                inner.style.transform = 'translateY(0)';
+
+                tg.HapticFeedback.impactOccurred('light');
+
+                if (i === 2) {
+                    if (isWin) {
+                        document.querySelector('.slots').classList.add('win-celebration');
+                        tg.HapticFeedback.notificationOccurred('success');
+                        setTimeout(() => {
+                            spinBtn.style.display = 'none';
+                            document.getElementById('claim-btn').style.display = 'block';
+                        }, 1300);
+                    } else {
+                        tg.HapticFeedback.notificationOccurred('error');
+                        spinBtn.disabled = false;
+                        spinBtn.innerText = 'Попробовать еще раз! 🔄';
+                        sendTelegramNotification('ЛОСЬ!', 'Софинесса проиграла в казино... 😢 Она хочет еще попытку!');
+                    }
+                }
+            }, i * 600);
+        });
+    }, 2000);
+}
+
+function showPrize() {
+    document.getElementById('prize-icon').innerText = currentPrize.icon;
+    document.getElementById('prize-name').innerText = currentPrize.name;
+
+    document.getElementById('game-modal').classList.remove('active');
+    const prizeModal = document.getElementById('prize-modal');
+    prizeModal.classList.add('active');
+    prizeModal.classList.add('no-close-modal');
+
+    tg.HapticFeedback.impactOccurred('heavy');
+}
+
+async function collectPrize() {
+    const btn = document.getElementById('final-collect-btn');
+    const originalText = btn.innerText;
+    btn.disabled = true;
+    btn.innerText = 'Забираю... 🍫';
+
+    const message = `🎰 *ВЫИГРЫШ В КАЗИНО!*\n\n` +
+        `Софинесса выбила джекпот и выиграла: *${currentPrize.name}* ${currentPrize.icon}\n\n` +
+        `Кот, пора исполнять! 💖`;
+
+    const success = await sendTelegramNotification('ВЫИГРЫШ!', message);
+
+    if (success) {
+        tg.HapticFeedback.notificationOccurred('success');
+        btn.innerText = 'Выигрыш твой! ❤️';
+        setTimeout(() => {
+            const prizeModal = document.getElementById('prize-modal');
+            prizeModal.classList.remove('active');
+            prizeModal.classList.remove('no-close-modal');
+            btn.disabled = false;
+            btn.innerText = originalText;
+        }, 2000);
+    } else {
+        btn.disabled = false;
+        btn.innerText = originalText;
+    }
+}
+
+async function sendTelegramNotification(type, text) {
+    try {
+        const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                chat_id: CHAT_ID,
+                text: text,
+                parse_mode: 'Markdown'
+            })
+        });
+        return response.ok;
+    } catch (e) {
+        console.error('Notification error:', e);
+        tg.HapticFeedback.notificationOccurred('error');
+        return false;
+    }
 }

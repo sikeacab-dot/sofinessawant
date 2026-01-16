@@ -171,6 +171,42 @@
         <img src="assets/alpaca.png" class="decor-alpaca" alt="Cute Alpaca">
     </div>
 
+    <!-- Hidden game elements -->
+    <div id="chocolate-drop" class="chocolate-emoji" onclick="openGameModal()">🍫</div>
+
+    <!-- Slot Machine Game Modal -->
+    <div id="game-modal" class="modal">
+        <div class="modal-content section-card slot-machine-container">
+            <h3>Шоколадный барабан</h3>
+            <div class="slots">
+                <div class="slot" id="slot1">
+                    <div class="slot-inner">🍒</div>
+                </div>
+                <div class="slot" id="slot2">
+                    <div class="slot-inner">🍫</div>
+                </div>
+                <div class="slot" id="slot3">
+                    <div class="slot-inner">🍰</div>
+                </div>
+            </div>
+            <div class="game-actions">
+                <button id="spin-btn" class="cat-btn" onclick="spinSlots()">Крутить!</button>
+                <button id="claim-btn" class="cat-btn" style="display: none;" onclick="showPrize()">Забрать
+                    выигрыш</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Prize Modal -->
+    <div id="prize-modal" class="modal">
+        <div class="modal-content section-card prize-container">
+            <h2 class="section-title">Твой приз! 🎁</h2>
+            <div id="prize-icon" class="prize-emoji">🍩</div>
+            <div id="prize-name" class="prize-text">Синабон</div>
+            <button id="final-collect-btn" class="cat-btn" onclick="collectPrize()">Забрать</button>
+        </div>
+    </div>
+
     <!-- Modal for links -->
     <div id="link-modal" class="modal">
         <div class="modal-content section-card">

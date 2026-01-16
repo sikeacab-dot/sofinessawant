@@ -354,6 +354,12 @@ body {
     background: white;
     padding: 30px;
     border-radius: 28px;
+    position: relative;
+    /* Added for container sizing */
+}
+
+.modal-content.slot-machine-container {
+    padding: 40px 20px;
 }
 
 .action-btn {
@@ -422,4 +428,184 @@ input[type="range"] {
         opacity: 0;
         transform: translateY(-100vh) translateX(50px);
     }
+}
+
+/* Hidden Game Styles */
+.chocolate-emoji {
+    position: fixed;
+    font-size: 3rem;
+    cursor: pointer;
+    z-index: 1000;
+    display: none;
+    user-select: none;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+}
+
+.chocolate-fall {
+    display: block;
+    animation: chocolateFallAnim 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes chocolateFallAnim {
+    0% {
+        transform: translateY(-100px) rotate(0deg);
+        opacity: 0;
+    }
+
+    10% {
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(0) rotate(360deg);
+    }
+}
+
+.slot-machine-container {
+    text-align: center;
+}
+
+.slot-machine-container {
+    background: linear-gradient(135deg, #fff5f5 0%, #fff 100%);
+    border: 4px solid #f9d423;
+    box-shadow: 0 15px 35px rgba(249, 212, 35, 0.3), 0 0 20px rgba(255, 107, 107, 0.1);
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+    padding: 30px;
+}
+
+.slots {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin: 30px 0;
+    padding: 25px;
+    background: #fff8e1;
+    border-radius: 25px;
+    border: 3px solid #ffe082;
+    transition: all 0.3s ease;
+}
+
+.slot {
+    width: 100px;
+    height: 100px;
+    background: white;
+    border-radius: 18px;
+    display: block;
+    font-size: 3.5rem;
+    /* Slightly larger symbols */
+    box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.1);
+    border: 2px solid #ffccbc;
+    overflow: hidden;
+    position: relative;
+}
+
+.slot-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.slot.spinning .slot-inner {
+    animation: slotVerticalSpin 0.5s linear infinite;
+}
+
+@keyframes slotVerticalSpin {
+    0% {
+        transform: translateY(-1000px);
+    }
+
+    100% {
+        transform: translateY(0);
+    }
+}
+
+.slots.win-celebration {
+    background: radial-gradient(circle, #fff9c4 0%, #fff8e1 100%) !important;
+    border-color: #f9d423 !important;
+    box-shadow: 0 0 60px rgba(249, 212, 35, 1), inset 0 0 30px rgba(249, 212, 35, 0.5) !important;
+    animation: winSlotsPulse 0.4s ease infinite alternate, winFlash 0.6s ease-out 1 !important;
+}
+
+@keyframes winFlash {
+    0% {
+        filter: brightness(3) contrast(1.5);
+    }
+
+    20% {
+        filter: brightness(4) contrast(2);
+    }
+
+    100% {
+        filter: brightness(1) contrast(1);
+    }
+}
+
+@keyframes winSlotsPulse {
+    from {
+        transform: scale(1);
+        filter: brightness(1);
+    }
+
+    to {
+        transform: scale(1.02);
+        filter: brightness(1.2);
+    }
+}
+
+.slots.win-celebration .slot {
+    border-color: #f9d423;
+    box-shadow: 0 0 15px rgba(249, 212, 35, 0.5);
+}
+
+.game-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 140px;
+    /* Space for both buttons if they swap */
+    justify-content: center;
+}
+
+.prize-container {
+    text-align: center;
+}
+
+.prize-emoji {
+    font-size: 5rem;
+    margin-bottom: 20px;
+    animation: prizePop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.prize-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent-coral);
+    margin-bottom: 30px;
+}
+
+@keyframes prizePop {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Prevent modal close for prize */
+.no-close-modal {
+    pointer-events: none;
+}
+
+.no-close-modal .modal-content {
+    pointer-events: auto;
 }
