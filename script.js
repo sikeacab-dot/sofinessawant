@@ -407,6 +407,9 @@ function openGameModal() {
 }
 
 function spinSlots() {
+    // Mark as played today immediately when spin starts
+    localStorage.setItem('last_play_date', new Date().toLocaleDateString());
+
     const spinBtn = document.getElementById('spin-btn');
     spinBtn.disabled = true;
     spinBtn.innerText = 'Крутим... ✨';
@@ -483,9 +486,9 @@ function spinSlots() {
                         }, 1300);
                     } else {
                         tg.HapticFeedback.notificationOccurred('error');
-                        spinBtn.disabled = false;
-                        spinBtn.innerText = 'Попробовать еще раз! 🔄';
-                        sendTelegramNotification('ЛОСЬ!', 'Софинесса проиграла в казино... 😢 Она хочет еще попытку!');
+                        spinBtn.disabled = true;
+                        spinBtn.innerText = 'Повезет завтра! 🍀';
+                        sendTelegramNotification('ЛОСЬ!', 'Софинесса проиграла в казино... 😢 Попытка на сегодня закончена.');
                     }
                 }
             }, i * 600);
@@ -518,9 +521,6 @@ async function collectPrize() {
     const success = await sendTelegramNotification('ВЫИГРЫШ!', message);
 
     if (success) {
-        // Save play date only after successful prize collection
-        localStorage.setItem('last_play_date', new Date().toLocaleDateString());
-
         tg.HapticFeedback.notificationOccurred('success');
         btn.innerText = 'Выигрыш твой! ❤️';
         setTimeout(() => {
