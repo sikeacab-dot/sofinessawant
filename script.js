@@ -370,6 +370,16 @@ function saveLink() {
 // Slot Machine Logic
 // Slot Machine Logic
 function openGameModal() {
+    // Check if played today
+    const lastPlay = localStorage.getItem('last_play_date');
+    const today = new Date().toLocaleDateString();
+
+    if (lastPlay === today) {
+        tg.HapticFeedback.notificationOccurred('error');
+        tg.showAlert('Сегодня ты уже крутила барабан! Приходи завтра 💖');
+        return;
+    }
+
     document.getElementById('chocolate-drop').style.display = 'none';
     document.getElementById('chocolate-drop').classList.remove('chocolate-fall');
 
@@ -508,6 +518,9 @@ async function collectPrize() {
     const success = await sendTelegramNotification('ВЫИГРЫШ!', message);
 
     if (success) {
+        // Save play date only after successful prize collection
+        localStorage.setItem('last_play_date', new Date().toLocaleDateString());
+
         tg.HapticFeedback.notificationOccurred('success');
         btn.innerText = 'Выигрыш твой! ❤️';
         setTimeout(() => {
