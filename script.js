@@ -39,7 +39,12 @@ const PRIZES = [
     { name: 'Куртюш', icon: '🥨' },
     { name: 'Горячий шоколад', icon: '☕' },
     { name: 'Бельгийская вафля', icon: '🧇' },
-    { name: 'Лимонный тарт', icon: '🍋' }
+    { name: 'Лимонный тарт', icon: '🍋' },
+    { name: 'Вишня в шоколаді', icon: '🍒' },
+    { name: 'Морожено', icon: '🍦' },
+    { name: 'Шоколадка', icon: '🍫' },
+    { name: 'Соломка в шоколаді', icon: '🥢' },
+    { name: 'Кукурудзяні палички з азійського магазу', icon: '🌽' }
 ];
 const SLOT_SYMBOLS = PRIZES.map(p => p.icon); // Using icons for slots to keep it visual
 let currentPrize = null;
@@ -422,8 +427,8 @@ function spinSlots() {
         document.getElementById('slot3')
     ];
 
-    // Determine outcome (60% win rate)
-    const isWin = Math.random() < 0.6;
+    // Determine outcome (30% win rate)
+    const isWin = Math.random() < 0.3;
     let results = [];
 
     if (isWin) {
