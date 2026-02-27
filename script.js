@@ -29,6 +29,7 @@ let currentModalTarget = null;
 let currentModalIndex = null;
 
 // Hidden Game State
+const GAME_LIMIT = 2;
 let alpacaClickCount = 0;
 let alpacaClickTimer = null;
 const PRIZES = [
@@ -374,14 +375,41 @@ function saveLink() {
 
 // Slot Machine Logic
 // Slot Machine Logic
-function openGameModal() {
-    // Check if played today
-    const lastPlay = localStorage.getItem('last_play_date');
+function getGamePlays() {
     const today = new Date().toLocaleDateString();
+    const data = localStorage.getItem('game_play_data');
 
-    if (lastPlay === today) {
+    // Migration from old logic if exists
+    if (!data) {
+        const oldLastPlay = localStorage.getItem('last_play_date');
+        if (oldLastPlay === today) {
+            return 1; // Assume they played once if old flag is set for today
+        }
+        return 0;
+    }
+
+    try {
+        const parsed = JSON.parse(data);
+        return parsed.date === today ? parsed.count : 0;
+    } catch (e) {
+        return 0;
+    }
+}
+
+function incrementGamePlays() {
+    const today = new Date().toLocaleDateString();
+    const count = getGamePlays() + 1;
+    localStorage.setItem('game_play_data', JSON.stringify({ date: today, count: count }));
+    // Also update old key for compatibility
+    localStorage.setItem('last_play_date', today);
+}
+
+function openGameModal() {
+    const playedToday = getGamePlays();
+
+    if (playedToday >= GAME_LIMIT) {
         tg.HapticFeedback.notificationOccurred('error');
-        tg.showAlert('Сегодня ты уже крутила барабан! Приходи завтра 💖');
+        tg.showAlert(`Сегодня ты уже использовала обе попытки! Приходи завтра 💖`);
         return;
     }
 
@@ -412,8 +440,8 @@ function openGameModal() {
 }
 
 function spinSlots() {
-    // Mark as played today immediately when spin starts
-    localStorage.setItem('last_play_date', new Date().toLocaleDateString());
+    incrementGamePlays();
+    const playedToday = getGamePlays();
 
     const spinBtn = document.getElementById('spin-btn');
     spinBtn.disabled = true;
@@ -490,10 +518,27 @@ function spinSlots() {
                             document.getElementById('claim-btn').style.display = 'block';
                         }, 1300);
                     } else {
+                        const remaining = GAME_LIMIT - playedToday;
                         tg.HapticFeedback.notificationOccurred('error');
                         spinBtn.disabled = true;
-                        spinBtn.innerText = 'Повезет завтра! 🍀';
-                        sendTelegramNotification('ЛОСЬ!', 'Софинесса проиграла в казино... 😢 Попытка на сегодня закончена.');
+
+                        if (remaining > 0) {
+                            spinBtn.innerText = `Ещё ${remaining} попытка!`;
+                            setTimeout(() => {
+                                spinBtn.disabled = false;
+                                spinBtn.innerText = 'Крутить! ✨';
+                            }, 2000);
+                        } else {
+                            spinBtn.innerText = 'Повезет завтра! 🍀';
+                            setTimeout(() => {
+                                document.getElementById('game-modal').classList.remove('active');
+                            }, 3000);
+                        }
+
+                        const lossMsg = remaining > 0
+                            ? `Софинесса проиграла... 😢 Но у неё есть ещё одна попытка!`
+                            : `Софинесса проиграла... 😢 Попытки на сегодня закончены.`;
+                        sendTelegramNotification('ЛОСЬ!', lossMsg);
                     }
                 }
             }, i * 600);
